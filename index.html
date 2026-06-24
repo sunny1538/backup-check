@@ -219,7 +219,7 @@
   // ── CONFIG ──
   const SUPABASE_URL = 'https://cwhtmomweslynqyjildp.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3aHRtb213ZXNseW5xeWppbGRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjA1MTgsImV4cCI6MjA5NzY5NjUxOH0.W6WtVBsNspCjZUIcj55t7DoxhtxVljftT4oZqjXmiu8';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // ── MENU DATA ──
   const MENU = [
@@ -243,7 +243,7 @@
   let currentUser = null;
 
   // ── AUTH STATE ──
-  supabase.auth.onAuthStateChange((event, session) => {
+  sb.auth.onAuthStateChange((event, session) => {
     currentUser = session?.user || null;
     updateNavUI();
   });
@@ -267,7 +267,7 @@
   }
 
   async function logout() {
-    await supabase.auth.signOut();
+    await sb.auth.signOut();
     showToast('Logged out. See you soon! 👋');
   }
 
@@ -344,7 +344,7 @@
     if (!currentUser) { openAuth(); return; }
     const items = Object.values(cart).map(i => ({ name: i.name, emoji: i.emoji, price: i.price, qty: i.qty }));
     const total = items.reduce((s, i) => s + i.price * i.qty, 0);
-    const { error } = await supabase.from('orders').insert({
+    const { error } = await sb.from('orders').insert({
       user_id: currentUser.id,
       user_email: currentUser.email,
       items,
@@ -372,7 +372,7 @@
     const msg = document.getElementById('email-msg');
     if (!email || !email.includes('@')) { showMsg(msg, 'Enter a valid email.', 'error'); return; }
     document.getElementById('otp-loader').innerHTML = '<span class="spinner"></span>';
-    const { error } = await supabase.auth.signInWithOtp({ email });
+    const { error } = await sb.auth.signInWithOtp({ email });
     document.getElementById('otp-loader').innerHTML = '';
     if (error) { showMsg(msg, error.message, 'error'); return; }
     document.querySelector('#otp-sub strong').textContent = email;
@@ -402,7 +402,7 @@
     const msg = document.getElementById('otp-msg');
     if (token.length < 6) { showMsg(msg, 'Enter the full 6-digit code.', 'error'); return; }
     document.getElementById('verify-loader').innerHTML = '<span class="spinner"></span>';
-    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+    const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
     document.getElementById('verify-loader').innerHTML = '';
     if (error) { showMsg(msg, 'Invalid or expired code. Try again.', 'error'); return; }
     closeAuth();
